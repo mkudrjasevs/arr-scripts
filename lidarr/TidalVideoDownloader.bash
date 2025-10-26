@@ -45,24 +45,18 @@ verifyConfig () {
 }
 
 TidalClientSetup () {
-	log "TIDAL :: Verifying tidal-dl configuration"
-	if [ ! -f /config/xdg/.tidal-dl.json ]; then
-		log "TIDAL :: No default config found, importing default config \"tidal.json\""
-		if [ -f /config/extended/tidal-dl.json ]; then
-			cp /config/extended/tidal-dl.json /config/xdg/.tidal-dl.json
-			chmod 777 -R /config/xdg/
-		fi
-	fi
+	log "TIDAL :: Verifying tidal-dl-ng configuration"
 	
-	tidal-dl -o "$videoDownloadPath"/incomplete 2>&1 | tee -a "/config/logs/$logFileName"
-	tidalQuality=HiFi
+	# Configure download path for videos
+	tidal-dl-ng cfg download_base_path "$videoDownloadPath"/incomplete 2>&1 | tee -a "/config/logs/$logFileName"
+	tidalQuality=LOSSLESS
 
-	if [ ! -f /config/xdg/.tidal-dl.token.json ]; then
-		#log "TIDAL :: ERROR :: Downgrade tidal-dl for workaround..."
-		#pip3 install tidal-dl==2022.3.4.2 --no-cache-dir &>/dev/null
+	# Check if already logged in, if not perform login
+	log "TIDAL :: Checking authentication status..."
+	if ! tidal-dl-ng cfg 2>&1 | grep -q "login"; then
 		log "TIDAL :: ERROR :: Loading client for required authentication, please authenticate, then exit the client..."
 		NotifyWebhook "FatalError" "TIDAL requires authentication, please authenticate now (check logs)"
-		tidal-dl 2>&1 | tee -a "/config/logs/$logFileName"
+		tidal-dl-ng login 2>&1 | tee -a "/config/logs/$logFileName"
 	fi
 	
 	if [ ! -d "$videoDownloadPath/incomplete" ]; then
@@ -81,9 +75,9 @@ TidaldlStatusCheck () {
 	until false
 	do
         running=no
-        if ps aux | grep "tidal-dl" | grep -v "grep" | read; then 
+        if ps aux | grep "tidal-dl-ng" | grep -v "grep" | read; then 
             running=yes
-            log "STATUS :: TIDAL-DL :: BUSY :: Pausing/waiting for all active tidal-dl tasks to end..."
+            log "STATUS :: TIDAL-DL-NG :: BUSY :: Pausing/waiting for all active tidal-dl-ng tasks to end..."
             sleep 2
             continue
         fi
@@ -92,12 +86,12 @@ TidaldlStatusCheck () {
 }
 
 TidalClientTest () { 
-	log "TIDAL :: tidal-dl client setup verification..."
+	log "TIDAL :: tidal-dl-ng client setup verification..."
 	i=0
 	while [ $i -lt 3 ]; do
 		i=$(( $i + 1 ))
   		TidaldlStatusCheck
-		tidal-dl -q Normal -o "$videoDownloadPath"/incomplete -l "$tidalClientTestDownloadId" 2>&1 | tee -a "/config/logs/$logFileName" 
+		tidal-dl-ng dl "https://tidal.com/browse/track/$tidalClientTestDownloadId" 2>&1 | tee -a "/config/logs/$logFileName"
 		downloadCount=$(find "$videoDownloadPath"/incomplete -type f -regex ".*/.*\.\(flac\|opus\|m4a\|mp3\)" | wc -l)
 		if [ $downloadCount -le 0 ]; then
 			continue
@@ -107,9 +101,6 @@ TidalClientTest () {
 	done
  	tidalClientTest="unknown"
 	if [ $downloadCount -le 0 ]; then
-		if [ -f /config/xdg/.tidal-dl.token.json ]; then
-			rm /config/xdg/.tidal-dl.token.json
-		fi
 		log "TIDAL :: ERROR :: Download failed"
 		log "TIDAL :: ERROR :: You will need to re-authenticate on next script run..."
 		log "TIDAL :: ERROR :: Exiting..."
@@ -339,7 +330,7 @@ VideoProcess () {
 
 			downloadFailed=false
 			log "$processCount/$lidarrArtistCount :: $lidarrArtistName :: $tidalVideoProcessNumber/$tidalVideoIdsCount :: $videoTitle ($id) :: Downloading..."
-			tidal-dl -r P1080 -o "$videoDownloadPath/incomplete" -l "$videoUrl" 2>&1 | tee -a "/config/logs/$logFileName"
+			tidal-dl-ng dl "$videoUrl" 2>&1 | tee -a "/config/logs/$logFileName"
 			find "$videoDownloadPath/incomplete" -type f -exec mv "{}" "$videoDownloadPath/incomplete"/ \;
 			find "$videoDownloadPath/incomplete" -mindepth 1 -type d -exec rm -rf "{}" \; &>/dev/null
 			find "$videoDownloadPath/incomplete" -type f -regex ".*/.*\.\(mkv\|mp4\)"  -print0 | while IFS= read -r -d '' video; do

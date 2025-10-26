@@ -32,12 +32,40 @@ apk add -U --upgrade --no-cache \
   libc-dev \
   uv \
   parallel \
-  npm && \
+  npm \
+  py3-pip \
+  py3-requests \
+  py3-beautifulsoup4 \
+  py3-colorama \
+  py3-mutagen && \
 echo "*** install freyr client ***" && \
 apk add --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing atomicparsley && \
 npm install -g miraclx/freyr-js &&\
 echo "*** install python packages ***" && \
-uv pip install --system --upgrade --no-cache-dir --break-system-packages \
+# Install available packages via apk first
+apk add --no-cache \
+  py3-jellyfish \
+  py3-yt-dlp \
+  py3-beets \
+  py3-pyacoustid \
+  py3-telegram-bot \
+  py3-pylast \
+  py3-langdetect 2>/dev/null || true && \
+# Install remaining packages via uv that aren't available in Alpine repos
+uv pip install --system --upgrade --no-cache-dir --break-system-packages --force-reinstall \
+  yq \
+  pyxDamerauLevenshtein \
+  r128gain \
+  ffmpeg-python \
+  tidal-dl-ng \
+  deemix \
+  apprise 2>/dev/null || \
+# Fallback: create virtual environment if system installation fails
+(echo "System installation failed, creating virtual environment..." && \
+python3 -m venv /opt/venv && \
+source /opt/venv/bin/activate && \
+pip install --upgrade pip && \
+pip install \
   jellyfish \
   beautifulsoup4 \
   yt-dlp \
@@ -51,10 +79,15 @@ uv pip install --system --upgrade --no-cache-dir --break-system-packages \
   pylast \
   mutagen \
   r128gain \
+  ffmpeg-python \
   tidal-dl-ng \
   deemix \
   langdetect \
-  apprise  && \
+  apprise && \
+# Create symlinks to make commands available system-wide
+ln -sf /opt/venv/bin/tidal-dl-ng /usr/local/bin/tidal-dl-ng && \
+ln -sf /opt/venv/bin/beet /usr/local/bin/beet && \
+ln -sf /opt/venv/bin/deemix /usr/local/bin/deemix) && \
 echo "************ setup SMA ************"
 if [ -d "${SMA_PATH}"  ]; then
   rm -rf "${SMA_PATH}"

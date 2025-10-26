@@ -56,7 +56,7 @@ InstallRequirements
 mkdir -p /config/scripts
 chmod 777 /config/scripts
 echo "Downloading SMA config: /config/scripts/sma.ini"
-curl "https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/sabnzbd/sma.ini" -o /config/sma.ini
+curl "https://raw.githubusercontent.com/mkudrjasevs/arr-scripts/main/sabnzbd/sma.ini" -o /config/sma.ini
 if [ -f /config/sma.ini ]; then
   if [ ! -f /config/scripts/sma.ini ]; then
     echo "Importing /config/sma.ini to /config/scripts/sma.ini"
@@ -68,7 +68,7 @@ if [ -f /config/sma.ini ]; then
 fi
 
 echo "Downloading SMA config: /config/scripts/sma_defaultlang.ini"
-curl "https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/sabnzbd/sma_defaultlang.ini" -o /config/sma_defaultlang.ini
+curl "https://raw.githubusercontent.com/mkudrjasevs/arr-scripts/main/sabnzbd/sma_defaultlang.ini" -o /config/sma_defaultlang.ini
 if [ -f /config/sma_defaultlang.ini ]; then
   if [ ! -f /config/scripts/sma_defaultlang.ini ]; then
     echo "Importing /config/sma.ini to /config/scripts/sma_defaultlang.ini"
@@ -81,7 +81,7 @@ fi
 
 
 echo "Downloading Video script: /config/scripts/video.bash"
-curl "https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/sabnzbd/video.bash" -o /config/video.bash
+curl "https://raw.githubusercontent.com/mkudrjasevs/arr-scripts/main/sabnzbd/video.bash" -o /config/video.bash
 if [ -f /config/video.bash ]; then
   if [ -f /config/scripts/video.bash ]; then
     echo "Removing /config/scripts/video.bash"
@@ -93,7 +93,7 @@ if [ -f /config/video.bash ]; then
 fi 
 
 echo "Downloading Audio script: /config/scripts/audio.bash"
-curl "https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/sabnzbd/audio.bash" -o /config/audio.bash
+curl "https://raw.githubusercontent.com/mkudrjasevs/arr-scripts/main/sabnzbd/audio.bash" -o /config/audio.bash
 if [ -f /config/audio.bash ]; then
   if [ -f /config/scripts/audio.bash ]; then
     echo "Removing /config/scripts/audio.bash"
@@ -106,7 +106,7 @@ fi
 
 
 echo "Downloading Audio script: /config/scripts/beets-config.yaml"
-curl "https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/sabnzbd/beets-config.yaml" -o /config/beets-config.yaml
+curl "https://raw.githubusercontent.com/mkudrjasevs/arr-scripts/main/sabnzbd/beets-config.yaml" -o /config/beets-config.yaml
 if [ -f /config/beets-config.yaml ]; then
   if [ -f /config/scripts/beets-config.yaml ]; then
     echo "Removing /config/scripts/beets-config.yaml"
@@ -118,12 +118,12 @@ if [ -f /config/beets-config.yaml ]; then
 fi 
 
 echo "Download audiobook script..."
-curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/sabnzbd/audiobook.bash -o /config/scripts/audiobook.bash
+curl https://raw.githubusercontent.com/mkudrjasevs/arr-scripts/main/sabnzbd/audiobook.bash -o /config/scripts/audiobook.bash
 echo "Done"
 
 if [ ! -f /config/extended.conf ]; then
 	echo "Download Extended config..."
-	curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/sabnzbd/extended.conf -o /config/extended.conf
+	curl https://raw.githubusercontent.com/mkudrjasevs/arr-scripts/main/sabnzbd/extended.conf -o /config/extended.conf
 	chmod 777 /config/extended.conf
 	echo "Done"
 fi

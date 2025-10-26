@@ -11,7 +11,7 @@ Container: <https://docs.linuxserver.io/images/docker-radarr>
   Docker Run Example:
   `-v /path/to/preferred/local/folder-01:/custom-services.d`
   `-v /path/to/preferred/local/folder-02:/custom-cont-init.d`
-1. Download the [script_init.bash](https://github.com/RandomNinjaAtk/arr-scripts/blob/main/radarr/scripts_init.bash) ([Download Link](https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/radarr/scripts_init.bash)) and place it into the following folder: `/custom-cont-init.d`
+1. Download the [script_init.bash](https://github.com/RandomNinjaAtk/arr-scripts/blob/main/radarr/scripts_init.bash) ([Download Link](https://raw.githubusercontent.com/mkudrjasevs/arr-scripts/main/radarr/scripts_init.bash)) and place it into the following folder: `/custom-cont-init.d`
 1. Start your container and wait for the application to load
 1. Optional: Customize the configuration by modifying the following file `/config/extended.conf`
 1. Restart the container
@@ -39,9 +39,9 @@ Updating is a bit more cumbersome. To update, do the following:
 
 <table>
   <tr>
-    <td><img src="https://raw.githubusercontent.com/RandomNinjaAtk/unraid-templates/master/randomninjaatk/img/radarr.png" width="200"></td>
+    <td><img src="https://raw.githubusercontent.com/mkudrjasevs/unraid-templates/master/randomninjaatk/img/radarr.png" width="200"></td>
     <td><img src="https://github.com/RandomNinjaAtk/docker-lidarr-extended/raw/main/.github/plus.png" width="100"></td>
-    <td><img src="https://raw.githubusercontent.com/RandomNinjaAtk/unraid-templates/master/randomninjaatk/img/amtd.png" width="200"></td>
+    <td><img src="https://raw.githubusercontent.com/mkudrjasevs/unraid-templates/master/randomninjaatk/img/amtd.png" width="200"></td>
   </tr>
  </table>
 
@@ -66,7 +66,7 @@ For more details, visit the [Wiki](https://github.com/RandomNinjaAtk/arr-scripts
 
 ### Plex Example
 
-![amvtd](https://raw.githubusercontent.com/RandomNinjaAtk/docker-amtd/master/.github/amvtd-plex-example.jpg)
+![amvtd](https://raw.githubusercontent.com/mkudrjasevs/docker-amtd/master/.github/amvtd-plex-example.jpg)
 
 ## Credits
 

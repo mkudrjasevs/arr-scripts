@@ -12,7 +12,7 @@ Container: <https://hub.docker.com/r/linuxserver/readarr>
   Docker Run Example:
   `-v /path/to/preferred/local/folder-01:/custom-services.d`
   `-v /path/to/preferred/local/folder-02:/custom-cont-init.d`
-1. Download the [script_init.bash](https://github.com/RandomNinjaAtk/arr-scripts/blob/main/readarr/scripts_init.bash) ([Download Link](https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/readarr/scripts_init.bash)) and place it into the following folder: `/custom-cont-init.d`
+1. Download the [script_init.bash](https://github.com/RandomNinjaAtk/arr-scripts/blob/main/readarr/scripts_init.bash) ([Download Link](https://raw.githubusercontent.com/mkudrjasevs/arr-scripts/main/readarr/scripts_init.bash)) and place it into the following folder: `/custom-cont-init.d`
 1. Start your container and wait for the application to load
 1. Optional: Customize the configuration by modifying the following file `/config/extended.conf`
 1. Restart the container

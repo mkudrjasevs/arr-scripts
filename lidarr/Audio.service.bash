@@ -303,6 +303,22 @@ NotFoundFolderCleaner () {
 TidalClientSetup () {
 	log "TIDAL :: Verifying tidal-dl-ng configuration"
 	
+	# Set up configuration directory and environment
+	export XDG_CONFIG_HOME="/config/xdg"
+	mkdir -p /config/xdg/tidal-dl-ng
+	
+	# Copy default configuration if it doesn't exist
+	if [ ! -f "/config/xdg/tidal-dl-ng/settings.json" ] && [ -f "/config/extended/tidal-dl-ng-config.json" ]; then
+		log "TIDAL :: Setting up default configuration"
+		cp /config/extended/tidal-dl-ng-config.json /config/xdg/tidal-dl-ng/settings.json
+		chmod 777 /config/xdg/tidal-dl-ng/settings.json
+	fi
+	
+	# Ensure token file permissions are correct if it exists
+	if [ -f "/config/xdg/tidal-dl-ng/token.json" ]; then
+		chmod 777 /config/xdg/tidal-dl-ng/token.json
+	fi
+	
 	# Configure download base path for tidal-dl-ng
 	TidaldlStatusCheck
 	tidal-dl-ng cfg download_base_path "$audioPath"/incomplete 2>&1 | tee -a "/config/logs/$logFileName"
@@ -321,11 +337,23 @@ TidalClientSetup () {
 	# Check if already logged in, if not perform login
 	log "TIDAL :: Checking authentication status..."
 	if ! tidal-dl-ng cfg 2>&1 | grep -q "login.*:"; then
+		log "TIDAL :: INFO :: Authentication required, starting OAuth2 device flow..."
+		log "TIDAL :: INFO :: Watch the logs below for the login URL to visit in your browser"
+		NotifyWebhook "Info" "TIDAL authentication needed - check logs for login URL"
 		TidaldlStatusCheck
-		log "TIDAL :: INFO :: Authentication required, starting login process..."
-		NotifyWebhook "Info" "TIDAL authentication needed"
-		TidaldlStatusCheck
+		
+		# Run login with full output to logs so user can see the URL
+		log "TIDAL :: Starting login process..."
 		tidal-dl-ng login 2>&1 | tee -a "/config/logs/$logFileName"
+		
+		# Verify login was successful
+		if tidal-dl-ng cfg 2>&1 | grep -q "login.*:"; then
+			log "TIDAL :: SUCCESS :: Authentication completed successfully"
+			NotifyWebhook "Success" "TIDAL authentication completed"
+		else
+			log "TIDAL :: ERROR :: Authentication failed or incomplete"
+			NotifyWebhook "Error" "TIDAL authentication failed"
+		fi
 	else
 		log "TIDAL :: Authentication verified successfully"
 	fi
@@ -909,10 +937,12 @@ NotifyLidarrForImport () {
 
 DeemixClientSetup () {
 	log "DEEZER :: Verifying deemix configuration"
+	
+	# Create deemix config directory
+	mkdir -p /config/xdg/deemix
+	
 	if [ ! -z "$arlToken" ]; then
 		arlToken="$(echo $arlToken | sed -e "s%[^[:alpha:][:digit:]]%%g" -e "s/  */ /g" | sed 's/^[.]*//' | sed  's/[.]*$//g' | sed  's/^ *//g' | sed 's/ *$//g')"
-		# Create directories
-		mkdir -p /config/xdg/deemix
 		if [ -f "/config/xdg/deemix/.arl" ]; then
 			rm "/config/xdg/deemix/.arl"
 		fi

@@ -56,7 +56,6 @@ uv pip install --system --upgrade --no-cache-dir --break-system-packages --force
   yq \
   pyxDamerauLevenshtein \
   r128gain \
-  ffmpeg-python \
   tidal-dl-ng \
   deemix \
   apprise 2>/dev/null || \
@@ -88,6 +87,10 @@ pip install \
 ln -sf /opt/venv/bin/tidal-dl-ng /usr/local/bin/tidal-dl-ng && \
 ln -sf /opt/venv/bin/beet /usr/local/bin/beet && \
 ln -sf /opt/venv/bin/deemix /usr/local/bin/deemix) && \
+echo "*** fix ffmpeg python package conflicts ***" && \
+# Remove conflicting ffmpeg package if it exists and install correct one
+(uv pip uninstall --system ffmpeg -y 2>/dev/null || true) && \
+uv pip install --system --upgrade --no-cache-dir --break-system-packages --force-reinstall ffmpeg-python 2>/dev/null && \
 echo "************ setup SMA ************"
 if [ -d "${SMA_PATH}"  ]; then
   rm -rf "${SMA_PATH}"
@@ -135,6 +138,12 @@ fi
 if [ ! -f /config/extended/deemix_config.json ]; then
   echo "Download Deemix config..."
   curl -sfL "https://raw.githubusercontent.com/mkudrjasevs/arr-scripts/main/lidarr/deemix_config.json" -o /config/extended/deemix_config.json
+  echo "Done"
+fi
+
+if [ ! -f /config/extended/tidal-dl-ng-config.json ]; then
+  echo "Download tidal-dl-ng config..."
+  curl -sfL "https://raw.githubusercontent.com/mkudrjasevs/arr-scripts/main/lidarr/tidal-dl-ng-config.json" -o /config/extended/tidal-dl-ng-config.json
   echo "Done"
 fi
 

@@ -306,16 +306,28 @@ TidalClientSetup () {
 	# Configure download base path for tidal-dl-ng
 	TidaldlStatusCheck
 	tidal-dl-ng cfg download_base_path "$audioPath"/incomplete 2>&1 | tee -a "/config/logs/$logFileName"
+	
+	# Configure FFmpeg path for tidal-dl-ng
+	if command -v ffmpeg >/dev/null 2>&1; then
+		FFMPEG_PATH=$(which ffmpeg)
+		log "TIDAL :: Configuring FFmpeg path: $FFMPEG_PATH"
+		tidal-dl-ng cfg path_binary_ffmpeg "$FFMPEG_PATH" 2>&1 | tee -a "/config/logs/$logFileName"
+	else
+		log "TIDAL :: WARNING :: FFmpeg not found, video processing may be limited"
+	fi
+	
 	DownloadFormat
 
 	# Check if already logged in, if not perform login
 	log "TIDAL :: Checking authentication status..."
-	if ! tidal-dl-ng cfg 2>&1 | grep -q "login"; then
+	if ! tidal-dl-ng cfg 2>&1 | grep -q "login.*:"; then
 		TidaldlStatusCheck
-		log "TIDAL :: ERROR :: Loading client for required authentication, please authenticate, then exit the client..."
-		NotifyWebhook "FatalError" "TIDAL requires authentication, please authenticate now (check logs)"
+		log "TIDAL :: INFO :: Authentication required, starting login process..."
+		NotifyWebhook "Info" "TIDAL authentication needed"
 		TidaldlStatusCheck
 		tidal-dl-ng login 2>&1 | tee -a "/config/logs/$logFileName"
+	else
+		log "TIDAL :: Authentication verified successfully"
 	fi
 
 	if [ ! -d /config/extended/cache/tidal ]; then

@@ -327,7 +327,7 @@ TidalClientSetup () {
 	if command -v ffmpeg >/dev/null 2>&1; then
 		FFMPEG_PATH=$(which ffmpeg)
 		log "TIDAL :: Configuring FFmpeg path: $FFMPEG_PATH"
-		tidal-dl-ng cfg path_binary_ffmpeg "$FFMPEG_PATH" 2>&1 | tee -a "/config/logs/$logFileName"
+#		tidal-dl-ng cfg path_binary_ffmpeg "$FFMPEG_PATH" 2>&1 | tee -a "/config/logs/$logFileName"
 	else
 		log "TIDAL :: WARNING :: FFmpeg not found, video processing may be limited"
 	fi

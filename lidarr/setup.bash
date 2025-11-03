@@ -25,6 +25,7 @@ apk add -U --upgrade --no-cache \
   jq \
   git \
   gcc \
+  xq \
   imagemagick \
   opus-tools \
   opustags \

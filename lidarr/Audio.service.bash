@@ -336,9 +336,9 @@ TidalClientSetup () {
 
 	# Check if already logged in, if not perform login
 	log "TIDAL :: Checking authentication status..."
-	# Test if we can actually use the token by running a quick command
-	if python3 -m tidal_dl_ng.cli search --query "test" --limit 1 >/dev/null 2>&1; then
-		log "TIDAL :: Authentication verified successfully (token valid)"
+	# Check if token file exists and is not empty
+	if [ -f "/config/xdg/tidal-dl-ng/token.json" ] && [ -s "/config/xdg/tidal-dl-ng/token.json" ]; then
+		log "TIDAL :: Authentication verified successfully (token file found)"
 	else
 		log "TIDAL :: INFO :: Authentication required, starting login flow..."
 		log "TIDAL :: INFO :: Watch the logs below for the login URL to visit in your browser"
@@ -862,7 +862,7 @@ ProcessWithBeets () {
 	sleep 0.5
 
 	log "$page :: $wantedAlbumListSource :: $processNumber of $wantedListAlbumTotal :: $lidarrArtistName :: $lidarrAlbumTitle :: $lidarrAlbumType :: Running beets import..."
-	beet -v -c /config/extended/beets-config.yaml -l /config/extended/beets-library.blb -d "$1" import "$1" 2>&1 | tee -a "/config/logs/$logFileName"
+	beet -c /config/extended/beets-config.yaml -l /config/extended/beets-library.blb -d "$1" -v import --quiet-fallback=asis "$1" 2>&1 | tee -a "/config/logs/$logFileName"
 	log "$page :: $wantedAlbumListSource :: $processNumber of $wantedListAlbumTotal :: $lidarrArtistName :: $lidarrAlbumTitle :: $lidarrAlbumType :: Beets import completed, checking results..."
 	
 	if [ $(find "$1" -type f -regex ".*/.*\.\(flac\|opus\|m4a\|mp3\)" -newer "/config/beets-match" | wc -l) -gt 0 ]; then

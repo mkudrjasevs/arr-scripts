@@ -16,7 +16,7 @@ echo "setupversion=$scriptVersion" > /config/setup_version.txt
 set -euo pipefail
 
 echo "*** install packages ***" && \
-apk add -U --upgrade --no-cache \
+apk add --no-cache \
   tidyhtml \
   musl-locales \
   musl-locales-lang \
@@ -34,9 +34,10 @@ apk add -U --upgrade --no-cache \
   npm \
   py3-pip \
   py3-requests \
+  ffmpeg \
   py3-beautifulsoup4 \
   py3-colorama \
-  py3-mutagen && \
+  py3-mutagen
 echo "*** install freyr client ***" && \
 apk add --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing atomicparsley && \
 npm install -g miraclx/freyr-js &&\
@@ -44,19 +45,30 @@ echo "*** install python packages ***" && \
 # Install available packages via apk first
 apk add --no-cache \
   py3-jellyfish \
-  py3-yt-dlp \
   py3-pyacoustid \
-  py3-telegram-bot \
   py3-pylast \
-  py3-langdetect 2>/dev/null || true && \
+  py3-langdetect
 # Install remaining packages via uv that aren't available in Alpine repos
 uv pip install --system --upgrade --no-cache-dir --break-system-packages --force-reinstall \
+  jellyfish \
+  beautifulsoup4 \
+  yt-dlp \
   yq \
   pyxDamerauLevenshtein \
+  pyacoustid \
+  requests \
+  colorama \
+  python-telegram-bot \
+  pylast \
+  mutagen \
   r128gain \
+  python-ffmpeg \
   tidal-dl-ng \
   deemix \
-  apprise 2>/dev/null || \
+  langdetect \
+  beets \
+  beets[chroma,embedart,lastgenre,lyrics] \
+  apprise
 # Fallback: create virtual environment if system installation fails
 (echo "System installation failed, creating virtual environment..." && \
 python3 -m venv /opt/venv && \
@@ -81,7 +93,7 @@ pip install \
   langdetect \
   beets \
   beets[chroma,embedart,lastgenre,lyrics] \
-  apprise && \
+  apprise
 # Create symlinks to make commands available system-wide
 ln -sf /opt/venv/bin/tidal-dl-ng /usr/local/bin/tidal-dl-ng && \
 ln -sf /opt/venv/bin/beet /usr/local/bin/beet && \

@@ -65,7 +65,7 @@ uv pip install --system --upgrade --no-cache-dir --break-system-packages --force
 python3 -m venv /opt/venv && \
 source /opt/venv/bin/activate && \
 pip install --upgrade pip && \
-pip install \
+pip install --break-system-packages \
   jellyfish \
   beautifulsoup4 \
   yt-dlp \
@@ -106,8 +106,7 @@ mkdir -p /custom-services.d/python /config/extended
 
 python3 -m pip uninstall ffmpeg-python
 python3 -m pip uninstall python-ffmpeg
-python3 -m pip install python-ffmpeg
-apk add ffmpeg
+python3 -m pip install python-ffmpeg --break-system-packages
 
 parallel ::: \
   'echo "Download QueueCleaner service..." && curl -sfL https://raw.githubusercontent.com/mkudrjasevs/arr-scripts/main/universal/services/QueueCleaner -o /custom-services.d/QueueCleaner && echo "Done"' \

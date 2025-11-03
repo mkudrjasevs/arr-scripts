@@ -37,7 +37,8 @@ apk add -U --upgrade --no-cache \
   py3-requests \
   py3-beautifulsoup4 \
   py3-colorama \
-  py3-mutagen && \
+  py3-mutagen \
+  chromaprint && \
 echo "*** install freyr client ***" && \
 apk add --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing atomicparsley && \
 npm install -g miraclx/freyr-js &&\

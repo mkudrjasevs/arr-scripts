@@ -11,7 +11,7 @@ lyrics:
     synced: yes
 
 match:
-    strong_rec_thresh: 0.10 # 0.04
+    strong_rec_thresh: 0.20 # 0.04
     medium_rec_thresh: 0.25 # 0.25
     rec_gap_thresh: 0.25 # 0.25
     max_rec:
@@ -71,7 +71,7 @@ import:
     group_albums: no
 
 chroma:
-    auto: no
+    auto: yes
 
 embedart:
     auto: yes

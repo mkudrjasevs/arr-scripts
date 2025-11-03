@@ -59,8 +59,8 @@ TidalClientSetup () {
 	fi
 	
 	# Ensure token file permissions are correct if it exists
-	if [ -f "/config/xdg/tidal-dl-ng/token.json" ]; then
-		chmod 777 /config/xdg/tidal-dl-ng/token.json
+	if [ -f "/config/xdg/tidal_dl_ng/token.json" ]; then
+		chmod 777 /config/xdg/tidal_dl_ng/token.json
 	fi
 	
 	# Configure download path for videos
@@ -80,7 +80,7 @@ TidalClientSetup () {
 	# Check if already logged in, if not perform login
 	log "TIDAL :: Checking authentication status..."
 	# Check if token file exists and is not empty
-	if [ -f "/config/xdg/tidal-dl-ng/token.json" ] && [ -s "/config/xdg/tidal-dl-ng/token.json" ]; then
+	if [ -f "/config/xdg/tidal_dl_ng/token.json" ] && [ -s "/config/xdg/tidal_dl_ng/token.json" ]; then
 		log "TIDAL :: Authentication verified successfully (token file found)"
 	else
 		log "TIDAL :: INFO :: Authentication required, starting login flow..."
@@ -116,7 +116,7 @@ TidalClientSetup () {
 			fi
 			
 			# Check both success message and token file existence
-			if [ "$LOGIN_SUCCESS" = true ] && [ -f "/config/xdg/tidal-dl-ng/token.json" ] && [ -s "/config/xdg/tidal-dl-ng/token.json" ]; then
+			if [ "$LOGIN_SUCCESS" = true ] && [ -f "/config/xdg/tidal_dl_ng/token.json" ] && [ -s "/config/xdg/tidal_dl_ng/token.json" ]; then
 				# Wait a moment for the login process to finish writing
 				sleep 2
 				log "TIDAL :: SUCCESS :: Authentication completed successfully"

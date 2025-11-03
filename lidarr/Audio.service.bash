@@ -315,8 +315,8 @@ TidalClientSetup () {
 	fi
 	
 	# Ensure token file permissions are correct if it exists
-	if [ -f "/config/xdg/tidal-dl-ng/token.json" ]; then
-		chmod 777 /config/xdg/tidal-dl-ng/token.json
+	if [ -f "/config/xdg/tidal_dl_ng/token.json" ]; then
+		chmod 777 /config/xdg/tidal_dl_ng/token.json
 	fi
 	
 	# Configure download base path for tidal-dl-ng
@@ -336,10 +336,12 @@ TidalClientSetup () {
 
 	# Check if already logged in, if not perform login
 	log "TIDAL :: Checking authentication status..."
+	log "TIDAL :: DEBUG :: Checking for token file at /config/xdg/tidal_dl_ng/token.json"
 	# Check if token file exists and is not empty
-	if [ -f "/config/xdg/tidal-dl-ng/token.json" ] && [ -s "/config/xdg/tidal-dl-ng/token.json" ]; then
+	if [ -f "/config/xdg/tidal_dl_ng/token.json" ] && [ -s "/config/xdg/tidal_dl_ng/token.json" ]; then
 		log "TIDAL :: Authentication verified successfully (token file found)"
 	else
+		log "TIDAL :: DEBUG :: Token file not found or empty, starting authentication..."
 		log "TIDAL :: INFO :: Authentication required, starting login flow..."
 		log "TIDAL :: INFO :: Watch the logs below for the login URL to visit in your browser"
 		NotifyWebhook "Info" "TIDAL authentication needed - check logs for login URL"
@@ -374,7 +376,7 @@ TidalClientSetup () {
 			fi
 			
 			# Check both success message and token file existence
-			if [ "$LOGIN_SUCCESS" = true ] && [ -f "/config/xdg/tidal-dl-ng/token.json" ] && [ -s "/config/xdg/tidal-dl-ng/token.json" ]; then
+			if [ "$LOGIN_SUCCESS" = true ] && [ -f "/config/xdg/tidal_dl_ng/token.json" ] && [ -s "/config/xdg/tidal_dl_ng/token.json" ]; then
 				# Wait a moment for the login process to finish writing
 				sleep 2
 				log "TIDAL :: SUCCESS :: Authentication completed successfully"
@@ -862,7 +864,7 @@ ProcessWithBeets () {
 	sleep 0.5
 
 	log "$page :: $wantedAlbumListSource :: $processNumber of $wantedListAlbumTotal :: $lidarrArtistName :: $lidarrAlbumTitle :: $lidarrAlbumType :: Running beets import..."
-	beet -c /config/extended/beets-config.yaml -l /config/extended/beets-library.blb -d "$1" -v import --quiet-fallback=asis "$1" 2>&1 | tee -a "/config/logs/$logFileName"
+	beet -c /config/extended/beets-config.yaml -l /config/extended/beets-library.blb -d "$1" -v import -q --quiet-fallback=asis "$1" 2>&1 | tee -a "/config/logs/$logFileName"
 	log "$page :: $wantedAlbumListSource :: $processNumber of $wantedListAlbumTotal :: $lidarrArtistName :: $lidarrAlbumTitle :: $lidarrAlbumType :: Beets import completed, checking results..."
 	
 	if [ $(find "$1" -type f -regex ".*/.*\.\(flac\|opus\|m4a\|mp3\)" -newer "/config/beets-match" | wc -l) -gt 0 ]; then

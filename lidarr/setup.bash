@@ -17,7 +17,6 @@ set -euo pipefail
 
 echo "*** install packages ***" && \
 apk add -U --upgrade --no-cache \
-  ffmpeg \
   tidyhtml \
   musl-locales \
   musl-locales-lang \
@@ -46,7 +45,6 @@ echo "*** install python packages ***" && \
 apk add --no-cache \
   py3-jellyfish \
   py3-yt-dlp \
-  py3-beets \
   py3-pyacoustid \
   py3-telegram-bot \
   py3-pylast \
@@ -56,7 +54,6 @@ uv pip install --system --upgrade --no-cache-dir --break-system-packages --force
   yq \
   pyxDamerauLevenshtein \
   r128gain \
-  python-ffmpeg \
   tidal-dl-ng \
   deemix \
   apprise 2>/dev/null || \
@@ -64,15 +61,11 @@ uv pip install --system --upgrade --no-cache-dir --break-system-packages --force
 (echo "System installation failed, creating virtual environment..." && \
 python3 -m venv /opt/venv && \
 source /opt/venv/bin/activate && \
-python3 -m pip uninstall ffmpeg-python \
-python3 -m pip uninstall python-ffmpeg \
-python3 -m pip install python-ffmpeg \
 pip install --upgrade pip && \
 pip install \
   jellyfish \
   beautifulsoup4 \
   yt-dlp \
-  beets \
   yq \
   pyxDamerauLevenshtein \
   pyacoustid \
@@ -82,9 +75,12 @@ pip install \
   pylast \
   mutagen \
   r128gain \
+  python-ffmpeg \
   tidal-dl-ng \
   deemix \
   langdetect \
+  beets \
+  beets[chroma,embedart,lastgenre,lyrics] \
   apprise && \
 # Create symlinks to make commands available system-wide
 ln -sf /opt/venv/bin/tidal-dl-ng /usr/local/bin/tidal-dl-ng && \

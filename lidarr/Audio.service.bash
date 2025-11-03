@@ -1293,7 +1293,7 @@ SearchProcess () {
 		for releaseId in $(echo "$lidarrAlbumReleaseIds"); do
 			releaseTitle=$(echo "$lidarrAlbumData" | jq -r ".releases[] | select(.id==$releaseId) | .title")
 			releaseDisambiguation=$(echo "$lidarrAlbumData" | jq -r ".releases[] | select(.id==$releaseId) | .disambiguation")
-			if [ -z "$releaseDisambiguation" ]; then
+			if [ -z "$releaseDisambiguation" ] || [ "$releaseDisambiguation" == "null" ]; then
 				releaseDisambiguation=""
 			else
 				releaseDisambiguation=" ($releaseDisambiguation)" 

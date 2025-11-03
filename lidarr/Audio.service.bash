@@ -336,7 +336,10 @@ TidalClientSetup () {
 
 	# Check if already logged in, if not perform login
 	log "TIDAL :: Checking authentication status..."
-	if ! tidal-dl-ng cfg 2>&1 | grep -q "login.*:"; then
+	# Check if token file exists and is not empty
+	if [ -f "/config/xdg/tidal-dl-ng/token.json" ] && [ -s "/config/xdg/tidal-dl-ng/token.json" ]; then
+		log "TIDAL :: Authentication verified successfully (token file found)"
+	else
 		log "TIDAL :: INFO :: Authentication required, starting OAuth2 device flow..."
 		log "TIDAL :: INFO :: Watch the logs below for the login URL to visit in your browser"
 		NotifyWebhook "Info" "TIDAL authentication needed - check logs for login URL"
@@ -346,16 +349,14 @@ TidalClientSetup () {
 		log "TIDAL :: Starting login process..."
 		tidal-dl-ng login 2>&1 | tee -a "/config/logs/$logFileName"
 		
-		# Verify login was successful
-		if tidal-dl-ng cfg 2>&1 | grep -q "login.*:"; then
+		# Verify login was successful by checking for token file
+		if [ -f "/config/xdg/tidal-dl-ng/token.json" ] && [ -s "/config/xdg/tidal-dl-ng/token.json" ]; then
 			log "TIDAL :: SUCCESS :: Authentication completed successfully"
 			NotifyWebhook "Success" "TIDAL authentication completed"
 		else
-			log "TIDAL :: ERROR :: Authentication failed or incomplete"
+			log "TIDAL :: ERROR :: Authentication failed or incomplete (token file not found)"
 			NotifyWebhook "Error" "TIDAL authentication failed"
 		fi
-	else
-		log "TIDAL :: Authentication verified successfully"
 	fi
 
 	if [ ! -d /config/extended/cache/tidal ]; then

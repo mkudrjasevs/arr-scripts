@@ -367,8 +367,8 @@ TidalClientSetup () {
 				cat "$TIDAL_LOGIN_LOG" >> "/config/logs/$logFileName"
 				> "$TIDAL_LOGIN_LOG"  # Clear temp log to avoid duplicates
 				
-				# Check if we see the success message
-				if grep -q "The login was successful" "/config/logs/$logFileName"; then
+				# Check if we see the success message or already logged in message
+				if grep -q "The login was successful\|You are logged in" "/config/logs/$logFileName"; then
 					LOGIN_SUCCESS=true
 				fi
 			fi
@@ -862,7 +862,7 @@ ProcessWithBeets () {
 	sleep 0.5
 
 	log "$page :: $wantedAlbumListSource :: $processNumber of $wantedListAlbumTotal :: $lidarrArtistName :: $lidarrAlbumTitle :: $lidarrAlbumType :: Running beets import..."
-	beet -c /config/extended/beets-config.yaml -l /config/extended/beets-library.blb -d "$1" import -q "$1" 2>&1 | tee -a "/config/logs/$logFileName"
+	beet -c /config/extended/beets-config.yaml -l /config/extended/beets-library.blb -d "$1" import "$1" 2>&1 | tee -a "/config/logs/$logFileName"
 	log "$page :: $wantedAlbumListSource :: $processNumber of $wantedListAlbumTotal :: $lidarrArtistName :: $lidarrAlbumTitle :: $lidarrAlbumType :: Beets import completed, checking results..."
 	
 	if [ $(find "$1" -type f -regex ".*/.*\.\(flac\|opus\|m4a\|mp3\)" -newer "/config/beets-match" | wc -l) -gt 0 ]; then

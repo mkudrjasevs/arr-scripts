@@ -81,7 +81,7 @@ python3 -m pip uninstall -y ffmpeg-python 2>/dev/null || true && \
 echo "*** create symlinks for command availability ***" && \
 ln -sf /opt/venv/bin/tidal-dl-ng /usr/local/bin/tidal-dl-ng && \
 ln -sf /opt/venv/bin/beet /usr/local/bin/beet && \
-ln -sf /opt/venv/bin/deemix /usr/local/bin/deemix && \
+ln -sf /opt/venv/bin/deemix /usr/local/bin/deemix
 echo "************ setup SMA ************"
 if [ -d "${SMA_PATH}"  ]; then
   rm -rf "${SMA_PATH}"
@@ -93,6 +93,7 @@ touch ${SMA_PATH}/config/sma.log && \
 chgrp users ${SMA_PATH}/config/sma.log && \
 chmod g+w ${SMA_PATH}/config/sma.log && \
 echo "************ install pip dependencies ************" && \
+source /opt/venv/bin/activate && \
 python3 -m pip install -r ${SMA_PATH}/setup/requirements.txt
 
 mkdir -p /custom-services.d/python /config/extended

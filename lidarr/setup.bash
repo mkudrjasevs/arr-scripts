@@ -68,13 +68,19 @@ python3 -m pip install --break-system-packages \
   pylast \
   mutagen \
   r128gain \
-  python-ffmpeg \
-  tidal-dl-ng \
   deemix \
   langdetect \
   apprise && \
-echo "*** remove conflicting ffmpeg-python package ***" && \
-python3 -m pip uninstall --break-system-packages -y ffmpeg-python 2>/dev/null || true
+echo "*** install python-ffmpeg (must be before tidal-dl-ng) ***" && \
+python3 -m pip install --break-system-packages python-ffmpeg && \
+echo "*** remove any existing ffmpeg-python package ***" && \
+python3 -m pip uninstall --break-system-packages -y ffmpeg-python 2>/dev/null || true && \
+echo "*** install tidal-dl-ng with --no-deps to avoid ffmpeg-python ***" && \
+python3 -m pip install --break-system-packages --no-deps tidal-dl-ng && \
+echo "*** install tidal-dl-ng missing dependencies ***" && \
+python3 -m pip install --break-system-packages tidalapi requests-oauthlib httpx dataclasses-json pycryptodomex m3u8 && \
+echo "*** verify only python-ffmpeg is installed ***" && \
+python3 -m pip list --format=freeze | grep -i ffmpeg
 echo "************ setup SMA ************"
 if [ -d "${SMA_PATH}"  ]; then
   rm -rf "${SMA_PATH}"

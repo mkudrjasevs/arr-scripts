@@ -51,12 +51,9 @@ apk add --no-cache \
   py3-telegram-bot \
   py3-pylast \
   py3-langdetect 2>/dev/null || true && \
-echo "*** create python virtual environment ***" && \
-python3 -m venv /opt/venv && \
-source /opt/venv/bin/activate && \
-python3 -m pip install --upgrade pip && \
-echo "*** install remaining python packages via pip ***" && \
-python3 -m pip install \
+echo "*** install remaining python packages via pip (system-wide) ***" && \
+python3 -m pip install --break-system-packages --upgrade pip && \
+python3 -m pip install --break-system-packages \
   jellyfish \
   beautifulsoup4 \
   yt-dlp \
@@ -77,11 +74,7 @@ python3 -m pip install \
   langdetect \
   apprise && \
 echo "*** remove conflicting ffmpeg-python package ***" && \
-python3 -m pip uninstall -y ffmpeg-python 2>/dev/null || true && \
-echo "*** create symlinks for command availability ***" && \
-ln -sf /opt/venv/bin/tidal-dl-ng /usr/local/bin/tidal-dl-ng && \
-ln -sf /opt/venv/bin/beet /usr/local/bin/beet && \
-ln -sf /opt/venv/bin/deemix /usr/local/bin/deemix
+python3 -m pip uninstall --break-system-packages -y ffmpeg-python 2>/dev/null || true
 echo "************ setup SMA ************"
 if [ -d "${SMA_PATH}"  ]; then
   rm -rf "${SMA_PATH}"
@@ -93,8 +86,7 @@ touch ${SMA_PATH}/config/sma.log && \
 chgrp users ${SMA_PATH}/config/sma.log && \
 chmod g+w ${SMA_PATH}/config/sma.log && \
 echo "************ install pip dependencies ************" && \
-source /opt/venv/bin/activate && \
-python3 -m pip install -r ${SMA_PATH}/setup/requirements.txt
+python3 -m pip install --break-system-packages -r ${SMA_PATH}/setup/requirements.txt
 
 mkdir -p /custom-services.d/python /config/extended
 

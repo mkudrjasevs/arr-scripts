@@ -359,15 +359,22 @@ TidalClientSetup () {
 		tail -f "$TIDAL_LOGIN_LOG" 2>/dev/null &
 		TAIL_PID=$!
 		
-		# Wait up to 120 seconds for login to complete
-		for i in {1..120}; do
+		# Wait up to 300 seconds for login to complete
+		LOGIN_SUCCESS=false
+		for i in {1..300}; do
 			# Copy temp log to main log file
 			if [ -f "$TIDAL_LOGIN_LOG" ]; then
 				cat "$TIDAL_LOGIN_LOG" >> "/config/logs/$logFileName"
 				> "$TIDAL_LOGIN_LOG"  # Clear temp log to avoid duplicates
+				
+				# Check if we see the success message
+				if grep -q "The login was successful" "/config/logs/$logFileName"; then
+					LOGIN_SUCCESS=true
+				fi
 			fi
 			
-			if [ -f "/config/xdg/tidal-dl-ng/token.json" ] && [ -s "/config/xdg/tidal-dl-ng/token.json" ]; then
+			# Check both success message and token file existence
+			if [ "$LOGIN_SUCCESS" = true ] && [ -f "/config/xdg/tidal-dl-ng/token.json" ] && [ -s "/config/xdg/tidal-dl-ng/token.json" ]; then
 				# Wait a moment for the login process to finish writing
 				sleep 2
 				log "TIDAL :: SUCCESS :: Authentication completed successfully"
@@ -378,6 +385,21 @@ TidalClientSetup () {
 				rm -f "$TIDAL_LOGIN_LOG"
 				break
 			fi
+			
+			# Check if login expired/failed
+			if grep -q "code will expire" "/config/logs/$logFileName" 2>/dev/null; then
+				# Check if code expired (waited more than 300 seconds since seeing the message)
+				if [ $i -gt 295 ]; then
+					log "TIDAL :: WARNING :: Login code expired, restarting authentication..."
+					kill $LOGIN_PID 2>/dev/null || true
+					kill $TAIL_PID 2>/dev/null || true
+					rm -f "$TIDAL_LOGIN_LOG"
+					# Restart the loop by not breaking
+					i=0
+					continue
+				fi
+			fi
+			
 			sleep 1
 		done
 		
@@ -393,8 +415,8 @@ TidalClientSetup () {
 			rm -f "$TIDAL_LOGIN_LOG"
 		fi
 		
-		# Final verification
-		if [ ! -f "/config/xdg/tidal-dl-ng/token.json" ] || [ ! -s "/config/xdg/tidal-dl-ng/token.json" ]; then
+		# Final verification - only show error if login was not successful
+		if [ "$LOGIN_SUCCESS" != true ]; then
 			log "TIDAL :: ERROR :: Authentication incomplete - token file not created within timeout"
 			log "TIDAL :: The login URL should be displayed above - please visit it to authenticate"
 			NotifyWebhook "Error" "TIDAL authentication timeout - please check logs for login URL"

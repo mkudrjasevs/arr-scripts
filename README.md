@@ -1,4 +1,6 @@
 # arr-scripts
+Fork of RandomNinjaAtk's arr-scripts to make it work with tidal-dl-ng instead of tidal-dl. Heavily used AI, but kinda works for me.
+
 
 Official Home of the scripts that were previously packaged with the "Extended" containers. Designed to be easily implemented/added to [Linuxserver.io](https://www.linuxserver.io/) containers.
 

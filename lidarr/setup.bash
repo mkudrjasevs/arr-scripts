@@ -16,7 +16,7 @@ echo "setupversion=$scriptVersion" > /config/setup_version.txt
 set -euo pipefail
 
 echo "*** install packages ***" && \
-apk add --no-cache \
+apk add -U --upgrade --no-cache \
   ffmpeg \
   tidyhtml \
   musl-locales \
@@ -37,7 +37,7 @@ apk add --no-cache \
   py3-requests \
   py3-beautifulsoup4 \
   py3-colorama \
-  py3-mutagen
+  py3-mutagen && \
 echo "*** install freyr client ***" && \
 apk add --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing atomicparsley && \
 npm install -g miraclx/freyr-js &&\
@@ -50,35 +50,22 @@ apk add --no-cache \
   py3-pyacoustid \
   py3-telegram-bot \
   py3-pylast \
-  py3-langdetect
+  py3-langdetect 2>/dev/null || true && \
 # Install remaining packages via uv that aren't available in Alpine repos
 uv pip install --system --upgrade --no-cache-dir --break-system-packages --force-reinstall \
-  jellyfish \
-  beautifulsoup4 \
-  yt-dlp \
-  beets \
   yq \
   pyxDamerauLevenshtein \
-  pyacoustid \
-  requests \
-  colorama \
-  python-telegram-bot \
-  pylast \
-  mutagen \
   r128gain \
   python-ffmpeg \
   tidal-dl-ng \
-  beets \
-  beets[chroma,embedart,lastgenre,lyrics] \
   deemix \
-  langdetect \
-  apprise
+  apprise 2>/dev/null || \
 # Fallback: create virtual environment if system installation fails
 (echo "System installation failed, creating virtual environment..." && \
-python3 -m venv /opt/venv
-source /opt/venv/bin/activate
-python3 -m pip install --upgrade pip
-python3 -m pip install \
+python3 -m venv /opt/venv && \
+source /opt/venv/bin/activate && \
+pip install --upgrade pip && \
+pip install \
   jellyfish \
   beautifulsoup4 \
   yt-dlp \
@@ -92,15 +79,12 @@ python3 -m pip install \
   pylast \
   mutagen \
   r128gain \
-  python-ffmpeg \
   tidal-dl-ng \
   beets \
-  beets[chroma,embedart,lastgenre,lyrics] \
+  beets[chroma,embedart,lastgenre,lyrics]
   deemix \
   langdetect \
-  apprise
-# Remove ffmpeg-python if it was installed as a dependency (conflicts with python-ffmpeg)
-uv pip uninstall --system --break-system-packages -y ffmpeg-python 2>/dev/null || true
+  apprise && \
 # Create symlinks to make commands available system-wide
 ln -sf /opt/venv/bin/tidal-dl-ng /usr/local/bin/tidal-dl-ng && \
 ln -sf /opt/venv/bin/beet /usr/local/bin/beet && \
@@ -119,6 +103,11 @@ echo "************ install pip dependencies ************" && \
 uv pip install --system --break-system-packages -r ${SMA_PATH}/setup/requirements.txt
 
 mkdir -p /custom-services.d/python /config/extended
+
+python3 -m pip uninstall ffmpeg-python
+python3 -m pip uninstall python-ffmpeg
+python3 -m pip install python-ffmpeg
+apk add ffmpeg
 
 parallel ::: \
   'echo "Download QueueCleaner service..." && curl -sfL https://raw.githubusercontent.com/mkudrjasevs/arr-scripts/main/universal/services/QueueCleaner -o /custom-services.d/QueueCleaner && echo "Done"' \

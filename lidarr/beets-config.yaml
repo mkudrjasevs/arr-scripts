@@ -65,7 +65,7 @@ import:
     incremental: no
     quiet_fallback: asis
     timid: no
-    duplicate_action: skip
+    duplicate_action: ask
     log: /config/extended/beets.log
     languages: ['en']
     group_albums: no

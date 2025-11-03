@@ -30,7 +30,6 @@ apk add -U --upgrade --no-cache \
   opustags \
   python3-dev \
   libc-dev \
-  uv \
   parallel \
   npm \
   py3-pip \
@@ -51,21 +50,11 @@ apk add --no-cache \
   py3-telegram-bot \
   py3-pylast \
   py3-langdetect 2>/dev/null || true && \
-# Install remaining packages via uv that aren't available in Alpine repos
-uv pip install --system --upgrade --no-cache-dir --break-system-packages --force-reinstall \
-  yq \
-  pyxDamerauLevenshtein \
-  r128gain \
-  python-ffmpeg \
-  tidal-dl-ng \
-  deemix \
-  apprise && \
-uv pip uninstall --system --break-system-packages -y ffmpeg-python 2>/dev/null || true || \
-# Fallback: create virtual environment if system installation fails
-(echo "System installation failed, creating virtual environment..." && \
+echo "*** create python virtual environment ***" && \
 python3 -m venv /opt/venv && \
 source /opt/venv/bin/activate && \
 python3 -m pip install --upgrade pip && \
+echo "*** install remaining python packages via pip ***" && \
 python3 -m pip install \
   jellyfish \
   beautifulsoup4 \
@@ -86,11 +75,12 @@ python3 -m pip install \
   deemix \
   langdetect \
   apprise && \
-pip uninstall -y ffmpeg-python 2>/dev/null || true && \
-# Create symlinks to make commands available system-wide
+echo "*** remove conflicting ffmpeg-python package ***" && \
+python3 -m pip uninstall -y ffmpeg-python 2>/dev/null || true && \
+echo "*** create symlinks for command availability ***" && \
 ln -sf /opt/venv/bin/tidal-dl-ng /usr/local/bin/tidal-dl-ng && \
 ln -sf /opt/venv/bin/beet /usr/local/bin/beet && \
-ln -sf /opt/venv/bin/deemix /usr/local/bin/deemix) && \
+ln -sf /opt/venv/bin/deemix /usr/local/bin/deemix && \
 echo "************ setup SMA ************"
 if [ -d "${SMA_PATH}"  ]; then
   rm -rf "${SMA_PATH}"
@@ -102,7 +92,7 @@ touch ${SMA_PATH}/config/sma.log && \
 chgrp users ${SMA_PATH}/config/sma.log && \
 chmod g+w ${SMA_PATH}/config/sma.log && \
 echo "************ install pip dependencies ************" && \
-uv pip install --system --break-system-packages -r ${SMA_PATH}/setup/requirements.txt
+python3 -m pip install -r ${SMA_PATH}/setup/requirements.txt
 
 mkdir -p /custom-services.d/python /config/extended
 

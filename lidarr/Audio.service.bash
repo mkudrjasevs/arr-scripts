@@ -340,30 +340,53 @@ TidalClientSetup () {
 	if [ -f "/config/xdg/tidal-dl-ng/token.json" ] && [ -s "/config/xdg/tidal-dl-ng/token.json" ]; then
 		log "TIDAL :: Authentication verified successfully (token file found)"
 	else
-		log "TIDAL :: INFO :: Authentication required, starting OAuth2 device flow..."
+		log "TIDAL :: INFO :: Authentication required, starting login flow..."
 		log "TIDAL :: INFO :: Watch the logs below for the login URL to visit in your browser"
 		NotifyWebhook "Info" "TIDAL authentication needed - check logs for login URL"
 		TidaldlStatusCheck
 		
 		# Run login with full output to logs so user can see the URL
 		log "TIDAL :: Starting login process..."
-		# Run in background with output redirection, then wait with timeout
-		PYTHONUNBUFFERED=1 tidal-dl-ng login > >(tee -a "/config/logs/$logFileName") 2>&1 &
+		
+		# Create temporary log file for tidal-dl-ng output
+		TIDAL_LOGIN_LOG="/tmp/tidal-login-$$.log"
+		
+		# Run login in background, redirecting to temp file
+		( PYTHONUNBUFFERED=1 python3 -u -m tidal_dl_ng.cli login 2>&1 | tee "$TIDAL_LOGIN_LOG" ) &
 		LOGIN_PID=$!
+		
+		# Tail the temp log in background to display output in real-time
+		tail -f "$TIDAL_LOGIN_LOG" 2>/dev/null &
+		TAIL_PID=$!
 		
 		# Wait up to 120 seconds for login to complete
 		for i in {1..120}; do
+			# Copy temp log to main log file
+			if [ -f "$TIDAL_LOGIN_LOG" ]; then
+				cat "$TIDAL_LOGIN_LOG" >> "/config/logs/$logFileName"
+				> "$TIDAL_LOGIN_LOG"  # Clear temp log to avoid duplicates
+			fi
+			
 			if [ -f "/config/xdg/tidal-dl-ng/token.json" ] && [ -s "/config/xdg/tidal-dl-ng/token.json" ]; then
 				log "TIDAL :: SUCCESS :: Authentication completed successfully"
 				NotifyWebhook "Success" "TIDAL authentication completed"
 				kill $LOGIN_PID 2>/dev/null || true
+				kill $TAIL_PID 2>/dev/null || true
+				rm -f "$TIDAL_LOGIN_LOG"
 				break
 			fi
 			sleep 1
 		done
 		
-		# Kill the login process if still running
+		# Kill the processes if still running
 		kill $LOGIN_PID 2>/dev/null || true
+		kill $TAIL_PID 2>/dev/null || true
+		
+		# Final log copy
+		if [ -f "$TIDAL_LOGIN_LOG" ]; then
+			cat "$TIDAL_LOGIN_LOG" >> "/config/logs/$logFileName"
+			rm -f "$TIDAL_LOGIN_LOG"
+		fi
 		
 		# Final verification
 		if [ ! -f "/config/xdg/tidal-dl-ng/token.json" ] || [ ! -s "/config/xdg/tidal-dl-ng/token.json" ]; then

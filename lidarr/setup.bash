@@ -59,17 +59,19 @@ uv pip install --system --upgrade --no-cache-dir --break-system-packages --force
   python-ffmpeg \
   tidal-dl-ng \
   deemix \
-  apprise 2>/dev/null || \
+  apprise && \
+uv pip uninstall --system --break-system-packages -y ffmpeg-python 2>/dev/null || true || \
 # Fallback: create virtual environment if system installation fails
 (echo "System installation failed, creating virtual environment..." && \
 python3 -m venv /opt/venv && \
 source /opt/venv/bin/activate && \
-pip install --upgrade pip && \
-pip install --break-system-packages \
+python3 -m pip install --upgrade pip && \
+python3 -m pip install \
   jellyfish \
   beautifulsoup4 \
   yt-dlp \
   beets \
+  beets[chroma,embedart,lastgenre,lyrics] \
   yq \
   pyxDamerauLevenshtein \
   pyacoustid \
@@ -79,12 +81,12 @@ pip install --break-system-packages \
   pylast \
   mutagen \
   r128gain \
+  python-ffmpeg \
   tidal-dl-ng \
-  beets \
-  beets[chroma,embedart,lastgenre,lyrics]
   deemix \
   langdetect \
   apprise && \
+pip uninstall -y ffmpeg-python 2>/dev/null || true && \
 # Create symlinks to make commands available system-wide
 ln -sf /opt/venv/bin/tidal-dl-ng /usr/local/bin/tidal-dl-ng && \
 ln -sf /opt/venv/bin/beet /usr/local/bin/beet && \
@@ -103,10 +105,6 @@ echo "************ install pip dependencies ************" && \
 uv pip install --system --break-system-packages -r ${SMA_PATH}/setup/requirements.txt
 
 mkdir -p /custom-services.d/python /config/extended
-
-python3 -m pip uninstall ffmpeg-python
-python3 -m pip uninstall python-ffmpeg
-python3 -m pip install python-ffmpeg --break-system-packages
 
 parallel ::: \
   'echo "Download QueueCleaner service..." && curl -sfL https://raw.githubusercontent.com/mkudrjasevs/arr-scripts/main/universal/services/QueueCleaner -o /custom-services.d/QueueCleaner && echo "Done"' \

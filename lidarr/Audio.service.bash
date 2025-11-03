@@ -347,15 +347,29 @@ TidalClientSetup () {
 		
 		# Run login with full output to logs so user can see the URL
 		log "TIDAL :: Starting login process..."
-		tidal-dl-ng login 2>&1 | tee -a "/config/logs/$logFileName"
+		# Run in background with output redirection, then wait with timeout
+		PYTHONUNBUFFERED=1 tidal-dl-ng login > >(tee -a "/config/logs/$logFileName") 2>&1 &
+		LOGIN_PID=$!
 		
-		# Verify login was successful by checking for token file
-		if [ -f "/config/xdg/tidal-dl-ng/token.json" ] && [ -s "/config/xdg/tidal-dl-ng/token.json" ]; then
-			log "TIDAL :: SUCCESS :: Authentication completed successfully"
-			NotifyWebhook "Success" "TIDAL authentication completed"
-		else
-			log "TIDAL :: ERROR :: Authentication failed or incomplete (token file not found)"
-			NotifyWebhook "Error" "TIDAL authentication failed"
+		# Wait up to 120 seconds for login to complete
+		for i in {1..120}; do
+			if [ -f "/config/xdg/tidal-dl-ng/token.json" ] && [ -s "/config/xdg/tidal-dl-ng/token.json" ]; then
+				log "TIDAL :: SUCCESS :: Authentication completed successfully"
+				NotifyWebhook "Success" "TIDAL authentication completed"
+				kill $LOGIN_PID 2>/dev/null || true
+				break
+			fi
+			sleep 1
+		done
+		
+		# Kill the login process if still running
+		kill $LOGIN_PID 2>/dev/null || true
+		
+		# Final verification
+		if [ ! -f "/config/xdg/tidal-dl-ng/token.json" ] || [ ! -s "/config/xdg/tidal-dl-ng/token.json" ]; then
+			log "TIDAL :: ERROR :: Authentication incomplete - token file not created within timeout"
+			log "TIDAL :: The login URL should be displayed above - please visit it to authenticate"
+			NotifyWebhook "Error" "TIDAL authentication timeout - please check logs for login URL"
 		fi
 	fi
 

@@ -83,21 +83,34 @@ TidalClientSetup () {
 	if [ -f "/config/xdg/tidal-dl-ng/token.json" ] && [ -s "/config/xdg/tidal-dl-ng/token.json" ]; then
 		log "TIDAL :: Authentication verified successfully (token file found)"
 	else
-		log "TIDAL :: INFO :: Authentication required, starting OAuth2 device flow..."
+		log "TIDAL :: INFO :: Authentication required, starting login flow..."
 		log "TIDAL :: INFO :: Watch the logs below for the login URL to visit in your browser"
 		NotifyWebhook "Info" "TIDAL authentication needed - check logs for login URL"
 		
 		# Run login with full output to logs so user can see the URL
 		log "TIDAL :: Starting login process..."
-		tidal-dl-ng login 2>&1 | tee -a "/config/logs/$logFileName"
+		# Run in background with output redirection, then wait with timeout
+		PYTHONUNBUFFERED=1 tidal-dl-ng login > >(tee -a "/config/logs/$logFileName") 2>&1 &
+		LOGIN_PID=$!
+		# Wait up to 300 seconds for login to complete
+		for i in {1..300}; do
+			if [ -f "/config/xdg/tidal-dl-ng/token.json" ] && [ -s "/config/xdg/tidal-dl-ng/token.json" ]; then
+				log "TIDAL :: SUCCESS :: Authentication completed successfully"
+				NotifyWebhook "Success" "TIDAL authentication completed"
+				kill $LOGIN_PID 2>/dev/null || true
+				break
+			fi
+			sleep 1
+		done
 		
-		# Verify login was successful by checking for token file
-		if [ -f "/config/xdg/tidal-dl-ng/token.json" ] && [ -s "/config/xdg/tidal-dl-ng/token.json" ]; then
-			log "TIDAL :: SUCCESS :: Authentication completed successfully"
-			NotifyWebhook "Success" "TIDAL authentication completed"
-		else
-			log "TIDAL :: ERROR :: Authentication failed or incomplete (token file not found)"
-			NotifyWebhook "Error" "TIDAL authentication failed"
+		# Kill the login process if still running
+		kill $LOGIN_PID 2>/dev/null || true
+		
+		# Final verification
+		if [ ! -f "/config/xdg/tidal-dl-ng/token.json" ] || [ ! -s "/config/xdg/tidal-dl-ng/token.json" ]; then
+			log "TIDAL :: ERROR :: Authentication incomplete - token file not created within timeout"
+			log "TIDAL :: The login URL should be displayed above - please visit it to authenticate"
+			NotifyWebhook "Error" "TIDAL authentication timeout - please check logs for login URL"
 		fi
 	fi
 	

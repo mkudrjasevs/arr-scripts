@@ -861,7 +861,10 @@ ProcessWithBeets () {
 	touch "/config/beets-match"
 	sleep 0.5
 
-	beet -c /config/extended/beets-config.yaml -l /config/extended/beets-library.blb -d "$1" import -q "$1"
+	log "$page :: $wantedAlbumListSource :: $processNumber of $wantedListAlbumTotal :: $lidarrArtistName :: $lidarrAlbumTitle :: $lidarrAlbumType :: Running beets import..."
+	beet -c /config/extended/beets-config.yaml -l /config/extended/beets-library.blb -d "$1" import -q "$1" 2>&1 | tee -a "/config/logs/$logFileName"
+	log "$page :: $wantedAlbumListSource :: $processNumber of $wantedListAlbumTotal :: $lidarrArtistName :: $lidarrAlbumTitle :: $lidarrAlbumType :: Beets import completed, checking results..."
+	
 	if [ $(find "$1" -type f -regex ".*/.*\.\(flac\|opus\|m4a\|mp3\)" -newer "/config/beets-match" | wc -l) -gt 0 ]; then
 		log "$page :: $wantedAlbumListSource :: $processNumber of $wantedListAlbumTotal :: $lidarrArtistName :: $lidarrAlbumTitle :: $lidarrAlbumType :: SUCCESS: Matched with beets!"
 		log "$page :: $wantedAlbumListSource :: $processNumber of $wantedListAlbumTotal :: $lidarrArtistName :: $lidarrAlbumTitle :: $lidarrAlbumType :: fixing track tags" 

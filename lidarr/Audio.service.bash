@@ -368,9 +368,12 @@ TidalClientSetup () {
 			fi
 			
 			if [ -f "/config/xdg/tidal-dl-ng/token.json" ] && [ -s "/config/xdg/tidal-dl-ng/token.json" ]; then
+				# Wait a moment for the login process to finish writing
+				sleep 2
 				log "TIDAL :: SUCCESS :: Authentication completed successfully"
 				NotifyWebhook "Success" "TIDAL authentication completed"
-				kill $LOGIN_PID 2>/dev/null || true
+				# Wait for the login process to exit naturally
+				wait $LOGIN_PID 2>/dev/null || true
 				kill $TAIL_PID 2>/dev/null || true
 				rm -f "$TIDAL_LOGIN_LOG"
 				break
@@ -378,8 +381,10 @@ TidalClientSetup () {
 			sleep 1
 		done
 		
-		# Kill the processes if still running
-		kill $LOGIN_PID 2>/dev/null || true
+		# Kill the processes if still running (only if timeout occurred)
+		if ps -p $LOGIN_PID > /dev/null 2>&1; then
+			kill $LOGIN_PID 2>/dev/null || true
+		fi
 		kill $TAIL_PID 2>/dev/null || true
 		
 		# Final log copy
